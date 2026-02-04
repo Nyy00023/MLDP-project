@@ -35,7 +35,7 @@ has_accident = st.selectbox(
 )
 
 # ===============================
-# Feature Engineering (must match training)
+# Feature Engineering
 # ===============================
 
 mileage_per_year = milage / (car_age + 1)
