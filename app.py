@@ -5,7 +5,7 @@ import pandas as pd
 
 st.set_page_config(
     page_title="Used Car Price Estimator",
-    page_icon="🚗",
+    page_icon="🚙",
     layout="centered"
 )
 
@@ -13,7 +13,7 @@ model = joblib.load("used_car_price_model.pkl")
 
 st.markdown(
     """
-    <h1 style="text-align:center;">🚗 Used Car Price Estimator</h1>
+    <h1 style="text-align:center;">🚙 Used Car Price Estimator</h1>
     <p style="text-align:center; color:gray;">
         Get an estimated market price using a machine-learning model trained on real used-car data
     </p>
@@ -23,7 +23,7 @@ st.markdown(
 
 st.divider()
 
-st.sidebar.header("🔧 Car Details")
+st.sidebar.header("Car Details")
 
 milage = st.sidebar.number_input(
     "Mileage (km)",
@@ -74,7 +74,7 @@ interior_color = st.sidebar.selectbox(
     ["Black", "Gray"]
 )
 
-st.subheader("📋 Vehicle Summary")
+st.subheader("Vehicle Summary")
 
 col1, col2, col3 = st.columns(3)
 
@@ -109,10 +109,10 @@ for col in model.feature_names_in_:
 input_data = input_data[model.feature_names_in_]
 
 st.divider()
-st.subheader("💰 Estimated Market Price")
+st.subheader("Estimated Market Price")
 
 if input_data.isnull().any().any():
-    st.error("❌ Invalid input detected. Please check your selections.")
+    st.error("Invalid input detected. Please check your selections.")
     st.stop()
 
 if st.button("Estimate Price", use_container_width=True):
