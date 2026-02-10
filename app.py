@@ -1,6 +1,5 @@
 import streamlit as st
 import joblib
-import numpy as np
 import pandas as pd
 
 st.set_page_config(
@@ -30,8 +29,7 @@ milage = st.sidebar.number_input(
     min_value=0,
     max_value=500_000,
     step=1_000,
-    value=50_000,
-    help="Total distance the car has been driven"
+    value=50_000
 )
 
 engine_liters = st.sidebar.number_input(
@@ -58,11 +56,11 @@ transmission = st.sidebar.selectbox(
     ["Automatic", "Manual"]
 )
 
-brand_columns = sorted([
+brand_columns = sorted(
     col.replace("brand_", "")
     for col in model.feature_names_in_
     if col.startswith("brand_")
-])
+)
 
 brand = st.sidebar.selectbox(
     "Car Brand",
@@ -76,12 +74,11 @@ interior_color = st.sidebar.selectbox(
 
 st.subheader("Vehicle Summary")
 
-col1, col2, col3 = st.columns(3)
+c1, c2, c3 = st.columns(3)
+c1.metric("Mileage", f"{milage:,} km")
+c2.metric("Engine", f"{engine_liters:.1f} L")
+c3.metric("Car Age", f"{car_age} years")
 
-col1.metric("Mileage", f"{milage:,} km")
-col2.metric("Engine", f"{engine_liters:.1f} L")
-col3.metric("Car Age", f"{car_age} years")
-avg_annual_mileage = milage / (car_age + 1)
 if car_age == 0 and milage > 20_000:
     st.warning("⚠️ Very high mileage for a new car. Please double-check.")
 
@@ -107,6 +104,44 @@ for col in model.feature_names_in_:
         input_data[col] = 0
 
 input_data = input_data[model.feature_names_in_]
+
+show_details = st.checkbox(
+    "🔍 Show calculated fields & model inputs",
+    help="View derived features and exact values sent to the model"
+)
+
+if show_details:
+    st.subheader("Input & Calculated Fields")
+
+    calc_df = pd.DataFrame({
+        "Field": [
+            "Mileage (km)",
+            "Engine Size (Liters)",
+            "Car Age (years)",
+            "Mileage per Year (km/year)",
+            "Transmission",
+            "Car Brand",
+            "Interior Colour",
+        ],
+        "Value": [
+            f"{milage:,}",
+            f"{engine_liters:.1f}",
+            car_age,
+            f"{mileage_per_year:,.0f}",
+            transmission,
+            brand,
+            interior_color,
+        ]
+    })
+
+    st.table(calc_df)
+
+    with st.expander("Model Input Vector (Advanced)"):
+        st.write(
+            "This table shows the exact feature values passed to the machine learning model "
+            "after feature engineering and encoding."
+        )
+        st.dataframe(input_data)
 
 st.divider()
 st.subheader("Estimated Market Price")
