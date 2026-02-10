@@ -106,7 +106,7 @@ for col in model.feature_names_in_:
 input_data = input_data[model.feature_names_in_]
 
 show_details = st.checkbox(
-    "🔍 Show calculated fields & model inputs",
+    "Show calculated fields & model inputs",
     help="View derived features and exact values sent to the model"
 )
 
