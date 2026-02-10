@@ -3,46 +3,35 @@ import joblib
 import numpy as np
 import pandas as pd
 
-# ===============================
-# Page Configuration
-# ===============================
 st.set_page_config(
     page_title="Used Car Price Estimator",
     page_icon="🚗",
     layout="centered"
 )
 
-# ===============================
-# Load trained model
-# ===============================
 model = joblib.load("used_car_price_model.pkl")
 
-# ===============================
-# Header
-# ===============================
-st.title("🚗 Used Car Price Estimator")
-st.write(
+st.markdown(
     """
-    This application estimates the **market price of a used car**
-    using a **Random Forest regression model** trained on real used-car listings.
-    
-    Adjust the car details in the sidebar and click **Estimate Price**.
-    """
+    <h1 style="text-align:center;">🚗 Used Car Price Estimator</h1>
+    <p style="text-align:center; color:gray;">
+        Get an estimated market price using a machine-learning model trained on real used-car data
+    </p>
+    """,
+    unsafe_allow_html=True
 )
 
 st.divider()
 
-# ===============================
-# Sidebar Inputs
-# ===============================
-st.sidebar.header("Car Details")
+st.sidebar.header("🔧 Car Details")
 
 milage = st.sidebar.number_input(
     "Mileage (km)",
     min_value=0,
     max_value=500_000,
     step=1_000,
-    value=50_000
+    value=50_000,
+    help="Total distance the car has been driven"
 )
 
 engine_liters = st.sidebar.number_input(
@@ -65,12 +54,10 @@ model_year = st.sidebar.number_input(
 car_age = CURRENT_YEAR - model_year
 
 transmission = st.sidebar.selectbox(
-    "Transmission",
+    "Transmission Type",
     ["Automatic", "Manual"]
 )
-# ===============================
-# Brand Selection (IMPORTANT)
-# ===============================
+
 brand_columns = sorted([
     col.replace("brand_", "")
     for col in model.feature_names_in_
@@ -83,19 +70,23 @@ brand = st.sidebar.selectbox(
 )
 
 interior_color = st.sidebar.selectbox(
-    "Interior Color",
+    "Interior Colour",
     ["Black", "Gray"]
 )
 
-# ===============================
-# Feature Engineering
-# ===============================
+st.subheader("📋 Vehicle Summary")
+
+col1, col2, col3 = st.columns(3)
+
+col1.metric("Mileage", f"{milage:,} km")
+col2.metric("Engine", f"{engine_liters:.1f} L")
+col3.metric("Car Age", f"{car_age} years")
+
 mileage_per_year = milage / (car_age + 1)
-# Interior colour one-hot encoding
+
 int_col_black = 1 if interior_color == "Black" else 0
 int_col_gray = 1 if interior_color == "Gray" else 0
 
-# Base input row
 input_data = pd.DataFrame({
     "milage": [milage],
     "engine_liters": [engine_liters],
@@ -108,23 +99,34 @@ input_data = pd.DataFrame({
     "int_col_Gray": [int_col_gray]
 })
 
-# ===============================
-# Align with training features
-# ===============================
 for col in model.feature_names_in_:
     if col not in input_data.columns:
         input_data[col] = 0
 
 input_data = input_data[model.feature_names_in_]
 
-# ===============================
-# Prediction Section
-# ===============================
 st.divider()
-st.subheader("Estimated Price")
+st.subheader("💰 Estimated Market Price")
 
 if st.button("Estimate Price", use_container_width=True):
     prediction = model.predict(input_data)[0]
-    st.success(f"💰 Estimated Used Car Price: **${prediction:,.2f}**")
+
+    st.markdown(
+        f"""
+        <div style="
+            background-color:#f0f9f4;
+            padding:25px;
+            border-radius:12px;
+            text-align:center;
+            border:1px solid #cceee0;
+        ">
+            <h2 style="color:#1b7f5f;">${prediction:,.0f}</h2>
+            <p style="color:gray;">
+                Estimated selling price based on similar vehicles
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.divider()
