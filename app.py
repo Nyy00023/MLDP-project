@@ -81,6 +81,9 @@ col1, col2, col3 = st.columns(3)
 col1.metric("Mileage", f"{milage:,} km")
 col2.metric("Engine", f"{engine_liters:.1f} L")
 col3.metric("Car Age", f"{car_age} years")
+avg_annual_mileage = milage / (car_age + 1)
+if car_age == 0 and milage > 20_000:
+    st.warning("⚠️ Very high mileage for a new car. Please double-check.")
 
 mileage_per_year = milage / (car_age + 1)
 
@@ -107,6 +110,10 @@ input_data = input_data[model.feature_names_in_]
 
 st.divider()
 st.subheader("💰 Estimated Market Price")
+
+if input_data.isnull().any().any():
+    st.error("❌ Invalid input detected. Please check your selections.")
+    st.stop()
 
 if st.button("Estimate Price", use_container_width=True):
     prediction = model.predict(input_data)[0]
